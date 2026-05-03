@@ -3,6 +3,7 @@
 import streamlit as st
 import pandas as pd
 import re
+from io import BytesIO
 
 # --- Load questions from existing Markdown file ---
 def load_questions(md_file="scale.md"):
@@ -30,10 +31,10 @@ responses = {}
 
 # --- Render form dynamically from md file ---
 for category, qs in questions.items():
-    st.header(category)
-    for q in qs:
-        choice = st.radio(q, options, key=q)
-        responses[q] = choice
+    with st.expander(category, expanded=True):  # collapsible sections
+        for q in qs:
+            choice = st.selectbox(q, options, key=q)
+            responses[q] = choice
 
 # --- Convert responses to DataFrame ---
 df = pd.DataFrame(list(responses.items()), columns=["Question", "Response"])
@@ -45,12 +46,9 @@ st.dataframe(df)
 csv = df.to_csv(index=False).encode("utf-8")
 
 # Excel export (in-memory)
-excel_buffer = pd.ExcelWriter("responses.xlsx", engine="xlsxwriter")
-df.to_excel(excel_buffer, index=False, sheet_name="Responses")
-excel_buffer.close()
-
-with open("responses.xlsx", "rb") as f:
-    excel_data = f.read()
+excel_buffer = BytesIO()
+df.to_excel(excel_buffer, index=False, sheet_name="Responses", engine="openpyxl")
+excel_buffer.seek(0)
 
 st.download_button(
     label="Download responses as CSV",
@@ -61,7 +59,7 @@ st.download_button(
 
 st.download_button(
     label="Download responses as Excel",
-    data=excel_data,
+    data=excel_buffer,
     file_name="responses.xlsx",
     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 )
