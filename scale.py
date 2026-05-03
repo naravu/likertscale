@@ -4,6 +4,7 @@ import streamlit as st
 import pandas as pd
 import re
 from io import BytesIO
+from datetime import date
 
 # --- Load questions from existing Markdown file ---
 def load_questions(md_file="scale.md"):
@@ -34,6 +35,12 @@ options = list(option_map.keys())
 
 st.title("Baby Care Beliefs & Behaviours Survey")
 
+# --- Additional Inputs ---
+st.subheader("Participant Information")
+name = st.text_input("Name")
+code = st.text_input("Code")
+survey_date = st.date_input("Date", value=date.today())
+
 responses = {}
 
 # --- Render form dynamically from md file ---
@@ -46,20 +53,28 @@ for category, qs in questions.items():
 # --- Convert responses to DataFrame ---
 df = pd.DataFrame(list(responses.items()), columns=["Question", "Response (Numeric)"])
 
+# Add participant info at the top
+meta_info = pd.DataFrame({
+    "Field": ["Name", "Code", "Date"],
+    "Value": [name, code, survey_date.strftime("%Y-%m-%d")]
+})
+
 st.subheader("Your Responses (Numeric Codes)")
+st.dataframe(meta_info)
 st.dataframe(df)
 
 # --- Download buttons ---
-csv = df.to_csv(index=False).encode("utf-8")
+csv_buffer = BytesIO()
+pd.concat([meta_info, df], ignore_index=True).to_csv(csv_buffer, index=False)
+csv_buffer.seek(0)
 
-# Excel export (in-memory)
 excel_buffer = BytesIO()
-df.to_excel(excel_buffer, index=False, sheet_name="Responses", engine="openpyxl")
+pd.concat([meta_info, df], ignore_index=True).to_excel(excel_buffer, index=False, sheet_name="Responses", engine="openpyxl")
 excel_buffer.seek(0)
 
 st.download_button(
     label="Download responses as CSV",
-    data=csv,
+    data=csv_buffer,
     file_name="responses.csv",
     mime="text/csv"
 )
