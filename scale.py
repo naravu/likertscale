@@ -3,8 +3,8 @@
 import streamlit as st
 import pandas as pd
 import re
-from io import BytesIO
 from datetime import datetime
+from io import BytesIO
 from st_gsheets_connection import connect
 
 # --- Load questions from existing Markdown file ---
@@ -60,7 +60,7 @@ st.subheader("Your Responses (Numeric Codes)")
 st.dataframe(df)
 
 # --- Google Sheets Integration using st-gsheets-connection ---
-conn = connect("gsheets", type="service_account", filename="service_account.json")
+conn = connect("gsheets", type="service_account", keyfile_dict=st.secrets["service_account"])
 
 if st.button("Submit Responses"):
     if name and code:
