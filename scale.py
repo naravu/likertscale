@@ -4,7 +4,7 @@ import streamlit as st
 import pandas as pd
 import re
 from io import BytesIO
-from datetime import date
+from datetime import datetime
 
 # --- Load questions from existing Markdown file ---
 def load_questions(md_file="scale.md"):
@@ -35,11 +35,11 @@ options = list(option_map.keys())
 
 st.title("Baby Care Beliefs & Behaviours Survey")
 
-# --- Additional Inputs ---
+# --- Automated Participant Info ---
 st.subheader("Participant Information")
 name = st.text_input("Name")
 code = st.text_input("Code")
-survey_date = st.date_input("Date", value=date.today())
+survey_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")  # auto timestamp
 
 responses = {}
 
@@ -55,8 +55,8 @@ df = pd.DataFrame(list(responses.items()), columns=["Question", "Response (Numer
 
 # Add participant info at the top
 meta_info = pd.DataFrame({
-    "Field": ["Name", "Code", "Date"],
-    "Value": [name, code, survey_date.strftime("%Y-%m-%d")]
+    "Field": ["Name", "Code", "DateTime"],
+    "Value": [name, code, survey_datetime]
 })
 
 st.subheader("Your Responses (Numeric Codes)")
