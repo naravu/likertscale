@@ -5,11 +5,10 @@ import pandas as pd
 import re
 from io import BytesIO
 from datetime import datetime
-import gspread
-from oauth2client.service_account import ServiceAccountCredentials
+from st_gsheets_connection import connect
 
 # --- Load questions from existing Markdown file ---
-def load_questions(md_file="baby_assessment.md"):
+def load_questions(md_file="scale.md"):
     questions = {}
     current_category = None
     with open(md_file, "r", encoding="utf-8") as f:
@@ -60,26 +59,20 @@ df = pd.DataFrame([row_data])
 st.subheader("Your Responses (Numeric Codes)")
 st.dataframe(df)
 
-# --- Google Sheets Integration ---
-def append_to_google_sheet(dataframe, sheet_name="BabyCareSurveyResponses"):
-    # Define scope
-    scope = ["https://spreadsheets.google.com/feeds",
-             "https://www.googleapis.com/auth/drive"]
+# --- Google Sheets Integration using st-gsheets-connection ---
+conn = connect("gsheets", type="service_account", filename="service_account.json")
 
-    # Authenticate using service account
-    creds = ServiceAccountCredentials.from_json_keyfile_name("service_account.json", scope)
-    client = gspread.authorize(creds)
-
-    # Open sheet
-    sheet = client.open(sheet_name).sheet1
-
-    # Append row
-    sheet.append_row(dataframe.iloc[0].tolist())
-
-# --- Submit Button ---
 if st.button("Submit Responses"):
     if name and code:
-        append_to_google_sheet(df)
+        # Read existing sheet
+        existing = conn.read(spreadsheet="BabyCareSurveyResponses", worksheet="Sheet1")
+        if existing is None or existing.empty:
+            updated = df
+        else:
+            updated = pd.concat([existing, df], ignore_index=True)
+
+        # Write back to sheet
+        conn.update(spreadsheet="BabyCareSurveyResponses", worksheet="Sheet1", data=updated)
         st.success("Responses submitted and saved to Google Sheet!")
     else:
         st.error("Please enter Name and Code before submitting.")
