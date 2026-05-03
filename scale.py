@@ -65,7 +65,7 @@ conn = connect("gsheets", type="service_account", filename="service_account.json
 if st.button("Submit Responses"):
     if name and code:
         # Read existing sheet
-        existing = conn.read(spreadsheet="BabyCareSurveyResponses", worksheet="Sheet1")
+        existing = conn.read(spreadsheet="likertscale", worksheet="Sheet1")
         if existing is None or existing.empty:
             updated = df
         else:
