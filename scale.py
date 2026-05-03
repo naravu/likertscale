@@ -23,7 +23,14 @@ def load_questions(md_file="scale.md"):
 
 questions = load_questions()
 
-options = ["Strongly Disagree", "Disagree", "Agree", "Strongly Agree"]
+# Mapping of options to numeric codes
+option_map = {
+    "Strongly Disagree": 1,
+    "Disagree": 2,
+    "Agree": 3,
+    "Strongly Agree": 4
+}
+options = list(option_map.keys())
 
 st.title("Baby Care Beliefs & Behaviours Survey")
 
@@ -34,12 +41,12 @@ for category, qs in questions.items():
     with st.expander(category, expanded=True):  # collapsible sections
         for q in qs:
             choice = st.selectbox(q, options, key=q)
-            responses[q] = choice
+            responses[q] = option_map[choice]  # store numeric value
 
 # --- Convert responses to DataFrame ---
-df = pd.DataFrame(list(responses.items()), columns=["Question", "Response"])
+df = pd.DataFrame(list(responses.items()), columns=["Question", "Response (Numeric)"])
 
-st.subheader("Your Responses")
+st.subheader("Your Responses (Numeric Codes)")
 st.dataframe(df)
 
 # --- Download buttons ---
