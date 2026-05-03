@@ -72,7 +72,7 @@ if st.button("Submit Responses"):
             updated = pd.concat([existing, df], ignore_index=True)
 
         # Write back to sheet
-        conn.update(spreadsheet="BabyCareSurveyResponses", worksheet="Sheet1", data=updated)
+        conn.update(spreadsheet="likertscale", worksheet="Sheet1", data=updated)
         st.success("Responses submitted and saved to Google Sheet!")
     else:
         st.error("Please enter Name and Code before submitting.")
