@@ -1,6 +1,5 @@
 streamlit
 pandas
 openpyxl
-gspread
-oauth2client
+st-gsheets-connection
 xlsxwriter
