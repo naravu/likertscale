@@ -35,7 +35,7 @@ option_map = {
 }
 options = list(option_map.keys())
 
-st.title("Baby Care Beliefs & Behaviours Survey")
+st.title("Baby Care Survey")
 
 # --- Participant Info ---
 st.subheader("Participant Information")
