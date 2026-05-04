@@ -60,13 +60,14 @@ df = pd.DataFrame([row_data])
 st.subheader("Your Responses (Numeric Codes)")
 st.dataframe(df)
 
-# --- Google Sheets Integration using gspread ---
+# --- Google Sheets Integration using Streamlit Secrets ---
 def append_to_google_sheet(dataframe, sheet_name="likertscale", worksheet_name="Sheet1"):
     scope = ["https://spreadsheets.google.com/feeds",
              "https://www.googleapis.com/auth/drive"]
 
-    # Authenticate using service account JSON
-    creds = ServiceAccountCredentials.from_json_keyfile_name("service_account.json", scope)
+    # Load credentials from Streamlit Secrets
+    service_account_info = st.secrets["service_account"]
+    creds = ServiceAccountCredentials.from_json_keyfile_dict(service_account_info, scope)
     client = gspread.authorize(creds)
 
     # Open sheet and worksheet
