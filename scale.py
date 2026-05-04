@@ -5,7 +5,8 @@ import pandas as pd
 import re
 from datetime import datetime
 from io import BytesIO
-from st_gsheets_connection import connect
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
 
 # --- Load questions from existing Markdown file ---
 def load_questions(md_file="scale.md"):
@@ -59,20 +60,24 @@ df = pd.DataFrame([row_data])
 st.subheader("Your Responses (Numeric Codes)")
 st.dataframe(df)
 
-# --- Google Sheets Integration using st-gsheets-connection ---
-conn = connect("gsheets", type="service_account", keyfile_dict=st.secrets["service_account"])
+# --- Google Sheets Integration using gspread ---
+def append_to_google_sheet(dataframe, sheet_name="likertscale", worksheet_name="Sheet1"):
+    scope = ["https://spreadsheets.google.com/feeds",
+             "https://www.googleapis.com/auth/drive"]
+
+    # Authenticate using service account JSON
+    creds = ServiceAccountCredentials.from_json_keyfile_name("service_account.json", scope)
+    client = gspread.authorize(creds)
+
+    # Open sheet and worksheet
+    sheet = client.open(sheet_name).worksheet(worksheet_name)
+
+    # Append row
+    sheet.append_row(dataframe.iloc[0].tolist())
 
 if st.button("Submit Responses"):
     if name and code:
-        # Read existing sheet
-        existing = conn.read(spreadsheet="likertscale", worksheet="Sheet1")
-        if existing is None or existing.empty:
-            updated = df
-        else:
-            updated = pd.concat([existing, df], ignore_index=True)
-
-        # Write back to sheet
-        conn.update(spreadsheet="likertscale", worksheet="Sheet1", data=updated)
+        append_to_google_sheet(df, sheet_name="likertscale", worksheet_name="Sheet1")
         st.success("Responses submitted and saved to Google Sheet!")
     else:
         st.error("Please enter Name and Code before submitting.")
