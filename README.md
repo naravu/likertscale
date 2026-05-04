@@ -1,4 +1,4 @@
-# likertscale Thooya's Project
+# Likertscale Thooya's Project
 
 # Baby Care Beliefs & Behaviours Survey App
 
