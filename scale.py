@@ -84,14 +84,28 @@ def append_to_google_sheet(dataframe, sheet_name="likertscale", worksheet_name="
     # Append row
     sheet.append_row(row_values)
 
-if st.button("Submit Responses"):
-    if name and code:
-        append_to_google_sheet(df, sheet_name="likertscale", worksheet_name="Sheet1")
-        st.success("Responses submitted and saved to Google Sheet!")
-    else:
-        st.error("Please enter Name and Code before submitting.")
+# --- Custom CSS for smaller buttons ---
+st.markdown("""
+    <style>
+    div.stButton > button, div.stDownloadButton > button {
+        padding: 0.4em 0.8em;
+        font-size: 0.85em;
+        border-radius: 6px;
+    }
+    </style>
+""", unsafe_allow_html=True)
 
-# --- Download buttons ---
+# --- Place buttons in a single row ---
+col1, col2, col3 = st.columns([1,1,1])
+
+with col1:
+    if st.button("✅ Submit"):
+        if name and code:
+            append_to_google_sheet(df, sheet_name="likertscale", worksheet_name="Sheet1")
+            st.success("Responses submitted and saved to Google Sheet!")
+        else:
+            st.error("Please enter Name and Code before submitting.")
+
 csv_buffer = BytesIO()
 df.to_csv(csv_buffer, index=False)
 csv_buffer.seek(0)
@@ -100,16 +114,18 @@ excel_buffer = BytesIO()
 df.to_excel(excel_buffer, index=False, sheet_name="Responses", engine="openpyxl")
 excel_buffer.seek(0)
 
-st.download_button(
-    label="Download responses as CSV",
-    data=csv_buffer,
-    file_name="responses.csv",
-    mime="text/csv"
-)
+with col2:
+    st.download_button(
+        label="📄 CSV",
+        data=csv_buffer,
+        file_name="responses.csv",
+        mime="text/csv"
+    )
 
-st.download_button(
-    label="Download responses as Excel",
-    data=excel_buffer,
-    file_name="responses.xlsx",
-    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-)
+with col3:
+    st.download_button(
+        label="📊 Excel",
+        data=excel_buffer,
+        file_name="responses.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
