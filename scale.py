@@ -73,6 +73,11 @@ def append_to_google_sheet(dataframe, sheet_name="likertscale", worksheet_name="
     # Open sheet and worksheet
     sheet = client.open(sheet_name).worksheet(worksheet_name)
 
+    # If sheet is empty, add header row first
+    if len(sheet.get_all_values()) == 0:
+        header = list(dataframe.columns.astype(str))
+        sheet.append_row(header)
+
     # Convert all values to strings to avoid int64 serialization errors
     row_values = dataframe.iloc[0].astype(str).tolist()
 
