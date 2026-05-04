@@ -57,7 +57,7 @@ row_data = {"Name": name, "Code": code, "DateTime": survey_datetime}
 row_data.update(responses)
 df = pd.DataFrame([row_data])
 
-st.subheader("Your Responses (Numeric Codes)")
+st.subheader("Responses (Numeric Codes)")
 st.dataframe(df)
 
 # --- Google Sheets Integration using Streamlit Secrets ---
