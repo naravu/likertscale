@@ -73,8 +73,11 @@ def append_to_google_sheet(dataframe, sheet_name="likertscale", worksheet_name="
     # Open sheet and worksheet
     sheet = client.open(sheet_name).worksheet(worksheet_name)
 
+    # Convert all values to strings to avoid int64 serialization errors
+    row_values = dataframe.iloc[0].astype(str).tolist()
+
     # Append row
-    sheet.append_row(dataframe.iloc[0].tolist())
+    sheet.append_row(row_values)
 
 if st.button("Submit Responses"):
     if name and code:
